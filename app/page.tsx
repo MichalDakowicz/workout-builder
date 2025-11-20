@@ -84,6 +84,9 @@ export default function Home() {
         try {
             await signOut(auth);
             setUser(null);
+            setTrainingDays(3);
+            setWorkoutPlan({});
+            setCurrentDay(1);
         } catch (error) {
             console.error("Logout failed", error);
         }
@@ -331,10 +334,15 @@ export default function Home() {
     }, [selectedExerciseIds]);
 
     const previewMuscles = useMemo(() => {
-        if (!hoveredExerciseId) return [];
-        const exercise = exercises.find(e => e.id === hoveredExerciseId);
-        return exercise ? [exercise.primaryMuscle, ...exercise.supportingMuscles] : [];
-    }, [hoveredExerciseId]);
+        if (hoveredExerciseId) {
+            const exercise = exercises.find(e => e.id === hoveredExerciseId);
+            return exercise ? [exercise.primaryMuscle, ...exercise.supportingMuscles] : [];
+        }
+        if (bodyPartFilter !== 'all') {
+            return [bodyPartFilter];
+        }
+        return [];
+    }, [hoveredExerciseId, bodyPartFilter]);
 
     const workoutStats = useMemo(() => {
         const stats: Record<string, { primary: number; secondary: number }> = {};
