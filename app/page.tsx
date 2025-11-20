@@ -2,9 +2,13 @@
 
 import { useState, useMemo, useEffect } from "react";
 import MuscleMap from "./components/MuscleMap";
+import ExerciseModal from "./components/ExerciseModal";
 import { exercises } from "./data/exercises";
 import { templates, WorkoutTemplate } from "./data/templates";
-import { Muscle, WorkoutExercise, Equipment, Difficulty, WorkoutSet, SetType } from "./types";
+import { Muscle, WorkoutExercise, Equipment, Difficulty, WorkoutSet, SetType, Exercise } from "./types";
+import { auth, db, googleProvider } from "./firebase";
+import { signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { ref, set, get, child } from "firebase/database";
 
 const muscleAliases: Record<string, Muscle[]> = {
     chest: ['pectorals'],
@@ -26,34 +30,87 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const [equipmentFilter, setEquipmentFilter] = useState<Equipment | 'all'>('all');
     const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'all'>('all');
+    const [bodyPartFilter, setBodyPartFilter] = useState<Muscle | 'all'>('all');
     const [activeDropdown, setActiveDropdown] = useState<{exId: string, setIdx: number} | null>(null);
     const [clipboard, setClipboard] = useState<WorkoutExercise[] | null>(null);
     const [viewMode, setViewMode] = useState<'workout' | 'library'>('workout');
     const [showTemplates, setShowTemplates] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
-    // Load data from local storage on mount
+    // Handle Auth State
     useEffect(() => {
-        const savedDays = localStorage.getItem("trainingDays");
-        const savedPlan = localStorage.getItem("workoutPlan");
-        
-        if (savedDays) {
-            // eslint-disable-next-line
-            setTrainingDays(parseInt(savedDays));
-        }
-        if (savedPlan) {
-            try {
-                setWorkoutPlan(JSON.parse(savedPlan));
-            } catch (e) {
-                console.error("Failed to parse workout plan", e);
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                loadUserData(currentUser.uid);
             }
-        }
+        });
+        return () => unsubscribe();
     }, []);
+
+    const loadUserData = async (userId: string) => {
+        setIsSyncing(true);
+        try {
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `users/${userId}`));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                // Only ask to load if there is local data that might be overwritten
+                const hasLocalData = Object.keys(workoutPlan).length > 0;
+                if (!hasLocalData || confirm("Found saved workout data in the cloud. Do you want to load it?")) {
+                    if (data.trainingDays) setTrainingDays(data.trainingDays);
+                    if (data.workoutPlan) setWorkoutPlan(data.workoutPlan);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading data:", error);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    const handleLogin = async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            console.error("Login failed", error);
+            alert("Login failed. Please try again.");
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            setUser(null);
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+    };
 
     // Save data to local storage on change
     useEffect(() => {
         localStorage.setItem("trainingDays", trainingDays.toString());
         localStorage.setItem("workoutPlan", JSON.stringify(workoutPlan));
-    }, [trainingDays, workoutPlan]);
+
+        // Save to Firebase if logged in
+        if (user) {
+            const saveData = async () => {
+                try {
+                    await set(ref(db, 'users/' + user.uid), {
+                        trainingDays,
+                        workoutPlan,
+                        lastUpdated: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.error("Error saving to cloud", e);
+                }
+            };
+            const timeoutId = setTimeout(saveData, 2000); // 2s debounce
+            return () => clearTimeout(timeoutId);
+        }
+    }, [trainingDays, workoutPlan, user]);
 
     const applyTemplate = (template: WorkoutTemplate) => {
         if (confirm(`This will overwrite your current workout plan with "${template.name}". Continue?`)) {
@@ -221,6 +278,14 @@ export default function Home() {
             filtered = filtered.filter(e => e.difficulty === difficultyFilter);
         }
 
+        // Filter by Body Part
+        if (bodyPartFilter !== 'all') {
+            filtered = filtered.filter(e => 
+                e.primaryMuscle === bodyPartFilter || 
+                e.supportingMuscles.includes(bodyPartFilter)
+            );
+        }
+
         const term = searchTerm.toLowerCase().trim();
         if (!term) return filtered;
 
@@ -240,7 +305,7 @@ export default function Home() {
 
             return matchesName || matchesPrimary || matchesSupporting || matchesAlias;
         });
-    }, [searchTerm, equipmentFilter, difficultyFilter]);
+    }, [searchTerm, equipmentFilter, difficultyFilter, bodyPartFilter]);
 
     const { primaryMuscles, secondaryMuscles } = useMemo(() => {
         const primary = new Set<Muscle>();
@@ -293,6 +358,21 @@ export default function Home() {
             .sort((a, b) => (b[1].primary + b[1].secondary) - (a[1].primary + a[1].secondary));
     }, [selectedExerciseIds]);
 
+    const muscleVolume = useMemo(() => {
+        const volume: Record<string, number> = {};
+        const currentExercises = workoutPlan[currentDay] || [];
+
+        currentExercises.forEach(workoutExercise => {
+            const exerciseDef = exercises.find(e => e.id === workoutExercise.exerciseId);
+            if (exerciseDef) {
+                const setCheck = workoutExercise.sets.length;
+                // Primary muscle gets full volume
+                volume[exerciseDef.primaryMuscle] = (volume[exerciseDef.primaryMuscle] || 0) + setCheck;
+            }
+        });
+        return volume;
+    }, [workoutPlan, currentDay]);
+
     const getSetTypeColor = (type: SetType) => {
         switch(type) {
             case 'warmup': return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/50';
@@ -306,6 +386,14 @@ export default function Home() {
         <div className="flex flex-col min-h-screen bg-zinc-50 font-sans dark:bg-black text-zinc-900 dark:text-white relative">
             {activeDropdown && (
                 <div className="fixed inset-0 z-10" onClick={() => setActiveDropdown(null)} />
+            )}
+
+            {/* Exercise Details Modal */}
+            {selectedExercise && (
+                <ExerciseModal 
+                    exercise={selectedExercise} 
+                    onClose={() => setSelectedExercise(null)} 
+                />
             )}
             
             {/* Templates Modal */}
@@ -347,9 +435,43 @@ export default function Home() {
             )}
 
             <header className="p-6 border-b border-zinc-200 dark:border-zinc-800">
-                <h1 className="text-3xl font-bold text-center mb-6">
-                    Workout Builder
-                </h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">
+                        Workout Builder
+                    </h1>
+                    <div className="flex items-center gap-4">
+                        {user ? (
+                            <div className="flex items-center gap-3">
+                                <div className="flex flex-col items-end">
+                                    <span className="text-sm font-medium">{user.displayName}</span>
+                                    <span className="text-xs text-zinc-500">{isSyncing ? 'Syncing...' : 'Synced'}</span>
+                                </div>
+                                {user.photoURL && (
+                                    <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+                                )}
+                                <button 
+                                    onClick={handleLogout}
+                                    className="text-sm text-red-500 hover:text-red-600"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={handleLogin}
+                                className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                </svg>
+                                Sign in with Google
+                            </button>
+                        )}
+                    </div>
+                </div>
                 
                 <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
                     <div className="flex flex-col gap-4 w-full md:w-auto">
@@ -496,7 +618,18 @@ export default function Home() {
                                         className="p-4 rounded-lg text-left transition-all border bg-blue-600 text-white border-blue-600 shadow-md"
                                     >
                                         <div className="flex justify-between items-start">
-                                            <div className="font-medium">{exercise.name}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="font-medium">{exercise.name}</div>
+                                                <button 
+                                                    onClick={() => setSelectedExercise(exercise)}
+                                                    className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                                                    title="View Details"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                             <div className="flex gap-1">
                                                 <button 
                                                     onClick={() => moveExercise(index, 'up')}
@@ -564,7 +697,7 @@ export default function Home() {
                                                         )}
                                                     </div>
                                                     
-                                                    {set.type !== 'failure' && (
+                                                    {set.type !== 'failure' && set.type !== 'dropset' && (
                                                         <input
                                                             type="number"
                                                             value={set.reps || ''}
@@ -641,6 +774,28 @@ export default function Home() {
                                 </select>
                             </div>
 
+                            <select
+                                value={bodyPartFilter}
+                                onChange={(e) => setBodyPartFilter(e.target.value as Muscle | 'all')}
+                                className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="all">All Body Parts</option>
+                                <option value="pectorals">Chest (Pectorals)</option>
+                                <option value="lats">Back (Lats)</option>
+                                <option value="traps">Traps</option>
+                                <option value="lower_back">Lower Back</option>
+                                <option value="shoulders">Shoulders</option>
+                                <option value="biceps">Biceps</option>
+                                <option value="triceps">Triceps</option>
+                                <option value="forearms">Forearms</option>
+                                <option value="abdominals">Abs</option>
+                                <option value="obliques">Obliques</option>
+                                <option value="quadriceps">Quads</option>
+                                <option value="hamstrings">Hamstrings</option>
+                                <option value="glutes">Glutes</option>
+                                <option value="calves">Calves</option>
+                            </select>
+
                             <div className="flex flex-col gap-2 overflow-y-auto max-h-[calc(100vh-250px)] pr-2">
                                 {filteredExercises.map(exercise => {
                                     const isSelected = selectedExerciseIds.includes(exercise.id);
@@ -663,7 +818,21 @@ export default function Home() {
                                                 className="w-full text-left"
                                             >
                                                 <div className="flex justify-between items-start">
-                                                    <div className="font-medium">{exercise.name}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="font-medium">{exercise.name}</div>
+                                                        <div 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedExercise(exercise);
+                                                            }}
+                                                            className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors text-zinc-400 hover:text-blue-500"
+                                                            title="View Details"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
                                                     <div className="flex gap-1">
                                                         <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${
                                                             isSelected ? "bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200" : "bg-zinc-100 dark:bg-zinc-800"
@@ -700,24 +869,33 @@ export default function Home() {
                             primaryMuscles={primaryMuscles}
                             secondaryMuscles={secondaryMuscles}
                             previewMuscles={previewMuscles}
+                            muscleVolume={muscleVolume}
+                            onMuscleClick={(muscle) => {
+                                setViewMode('library');
+                                setBodyPartFilter(muscle === bodyPartFilter ? 'all' : muscle);
+                            }}
                         />
                     </div>
-                    <div className="mt-6 flex gap-4 text-sm">
+                    <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-4 bg-[#ecf0f1] border border-zinc-300 rounded"></div>
-                            <span>Untrained</span>
+                            <span>0 sets</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-[#e74c3c] rounded"></div>
-                            <span>Primary</span>
+                            <div className="w-4 h-4 bg-[#4ade80] rounded"></div>
+                            <span>1-2 sets</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-[#e67e22] rounded"></div>
-                            <span>Supporting</span>
+                            <div className="w-4 h-4 bg-[#facc15] rounded"></div>
+                            <span>3-5 sets</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-[#f1c40f] rounded"></div>
-                            <span>Preview</span>
+                            <div className="w-4 h-4 bg-[#fb923c] rounded"></div>
+                            <span>6-9 sets</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-[#f87171] rounded"></div>
+                            <span>10+ sets</span>
                         </div>
                     </div>
 

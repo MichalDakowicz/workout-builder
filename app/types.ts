@@ -32,6 +32,8 @@ export interface Exercise {
   supportingMuscles: Muscle[];
   equipment: Equipment;
   difficulty: Difficulty;
+  instructions?: string[];
+  tips?: string[];
 }
 
 export type SetType = 'warmup' | 'normal' | 'failure' | 'dropset';

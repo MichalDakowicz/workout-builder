@@ -1,9 +1,65 @@
 import { Exercise } from '../types';
 
 export const exercises: Exercise[] = [
-  { id: '1', name: 'Bench Press', primaryMuscle: 'pectorals', supportingMuscles: ['shoulders', 'triceps'], equipment: 'barbell', difficulty: 'intermediate' },
-  { id: '2', name: 'Squat', primaryMuscle: 'quadriceps', supportingMuscles: ['glutes', 'hamstrings', 'lower_back'], equipment: 'barbell', difficulty: 'advanced' },
-  { id: '3', name: 'Deadlift', primaryMuscle: 'lower_back', supportingMuscles: ['hamstrings', 'glutes', 'traps', 'forearms'], equipment: 'barbell', difficulty: 'advanced' },
+  { 
+    id: '1', 
+    name: 'Bench Press', 
+    primaryMuscle: 'pectorals', 
+    supportingMuscles: ['shoulders', 'triceps'], 
+    equipment: 'barbell', 
+    difficulty: 'intermediate',
+    instructions: [
+      "Lie on a flat bench with your eyes under the bar.",
+      "Grip the bar slightly wider than shoulder-width.",
+      "Unrack the bar and lower it to your mid-chest.",
+      "Press the bar back up until your arms are fully extended."
+    ],
+    tips: [
+      "Keep your feet flat on the floor for stability.",
+      "Don't bounce the bar off your chest.",
+      "Keep your elbows at a 45-degree angle."
+    ]
+  },
+  { 
+    id: '2', 
+    name: 'Squat', 
+    primaryMuscle: 'quadriceps', 
+    supportingMuscles: ['glutes', 'hamstrings', 'lower_back'], 
+    equipment: 'barbell', 
+    difficulty: 'advanced',
+    instructions: [
+      "Stand with feet shoulder-width apart, bar resting on your upper back.",
+      "Break at the hips and knees to lower yourself.",
+      "Keep your chest up and back straight.",
+      "Lower until your thighs are parallel to the floor.",
+      "Drive back up through your heels."
+    ],
+    tips: [
+      "Keep your knees in line with your toes.",
+      "Brace your core before descending.",
+      "Look straight ahead, not down."
+    ]
+  },
+  { 
+    id: '3', 
+    name: 'Deadlift', 
+    primaryMuscle: 'lower_back', 
+    supportingMuscles: ['hamstrings', 'glutes', 'traps', 'forearms'], 
+    equipment: 'barbell', 
+    difficulty: 'advanced',
+    instructions: [
+      "Stand with feet hip-width apart, mid-foot under the bar.",
+      "Bend over and grab the bar shoulder-width apart.",
+      "Bend your knees until your shins touch the bar.",
+      "Lift your chest up and straighten your lower back.",
+      "Pull the bar up by extending your hips and knees."
+    ],
+    tips: [
+      "Keep the bar close to your body throughout the lift.",
+      "Don't round your back.",
+      "Squeeze your glutes at the top."
+    ]
+  },
   { id: '4', name: 'Pull Up', primaryMuscle: 'lats', supportingMuscles: ['biceps', 'forearms'], equipment: 'bodyweight', difficulty: 'intermediate' },
   { id: '5', name: 'Overhead Press', primaryMuscle: 'shoulders', supportingMuscles: ['triceps'], equipment: 'barbell', difficulty: 'intermediate' },
   { id: '6', name: 'Barbell Row', primaryMuscle: 'lats', supportingMuscles: ['traps', 'biceps', 'lower_back'], equipment: 'barbell', difficulty: 'intermediate' },
