@@ -23,17 +23,15 @@ export type Equipment =
   | 'kettlebell'
   | 'other';
 
-export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
-
 export interface Exercise {
   id: string;
   name: string;
   primaryMuscle: Muscle;
   supportingMuscles: Muscle[];
   equipment: Equipment;
-  difficulty: Difficulty;
   instructions?: string[];
   tips?: string[];
+  gifUrl?: string;
 }
 
 export type SetType = 'warmup' | 'normal' | 'failure' | 'dropset';

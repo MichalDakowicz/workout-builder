@@ -5,7 +5,7 @@ import MuscleMap from "./components/MuscleMap";
 import ExerciseModal from "./components/ExerciseModal";
 import { exercises } from "./data/exercises";
 import { templates, WorkoutTemplate } from "./data/templates";
-import { Muscle, WorkoutExercise, Equipment, Difficulty, WorkoutSet, SetType, Exercise } from "./types";
+import { Muscle, WorkoutExercise, Equipment, WorkoutSet, SetType, Exercise } from "./types";
 import { auth, db, googleProvider } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { ref, set, get, child } from "firebase/database";
@@ -29,7 +29,6 @@ export default function Home() {
     const [hoveredExerciseId, setHoveredExerciseId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [equipmentFilter, setEquipmentFilter] = useState<Equipment | 'all'>('all');
-    const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'all'>('all');
     const [bodyPartFilter, setBodyPartFilter] = useState<Muscle | 'all'>('all');
     const [activeDropdown, setActiveDropdown] = useState<{exId: string, setIdx: number} | null>(null);
     const [clipboard, setClipboard] = useState<WorkoutExercise[] | null>(null);
@@ -276,11 +275,6 @@ export default function Home() {
             filtered = filtered.filter(e => e.equipment === equipmentFilter);
         }
 
-        // Filter by Difficulty
-        if (difficultyFilter !== 'all') {
-            filtered = filtered.filter(e => e.difficulty === difficultyFilter);
-        }
-
         // Filter by Body Part
         if (bodyPartFilter !== 'all') {
             filtered = filtered.filter(e => 
@@ -308,7 +302,7 @@ export default function Home() {
 
             return matchesName || matchesPrimary || matchesSupporting || matchesAlias;
         });
-    }, [searchTerm, equipmentFilter, difficultyFilter, bodyPartFilter]);
+    }, [searchTerm, equipmentFilter, bodyPartFilter]);
 
     const { primaryMuscles, secondaryMuscles } = useMemo(() => {
         const primary = new Set<Muscle>();
@@ -380,6 +374,28 @@ export default function Home() {
         });
         return volume;
     }, [workoutPlan, currentDay]);
+
+    const neglectedMuscles = useMemo(() => {
+        const allMuscles: Muscle[] = [
+            'traps', 'shoulders', 'pectorals', 'biceps', 'forearms', 
+            'abdominals', 'obliques', 'quadriceps', 'calves', 'triceps', 
+            'lats', 'lower_back', 'glutes', 'hamstrings'
+        ];
+        
+        const hitMuscles = new Set<string>();
+        
+        Object.values(workoutPlan).forEach(dayExercises => {
+            dayExercises.forEach(workoutExercise => {
+                const exerciseDef = exercises.find(e => e.id === workoutExercise.exerciseId);
+                if (exerciseDef) {
+                    hitMuscles.add(exerciseDef.primaryMuscle);
+                    exerciseDef.supportingMuscles.forEach(m => hitMuscles.add(m));
+                }
+            });
+        });
+        
+        return allMuscles.filter(m => !hitMuscles.has(m));
+    }, [workoutPlan]);
 
     const getSetTypeColor = (type: SetType) => {
         switch(type) {
@@ -769,17 +785,6 @@ export default function Home() {
                                     <option value="cables">Cables</option>
                                     <option value="bodyweight">Bodyweight</option>
                                 </select>
-
-                                <select
-                                    value={difficultyFilter}
-                                    onChange={(e) => setDifficultyFilter(e.target.value as Difficulty | 'all')}
-                                    className="w-1/2 p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="all">All Levels</option>
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
                             </div>
 
                             <select
@@ -842,11 +847,6 @@ export default function Home() {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-1">
-                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${
-                                                            isSelected ? "bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200" : "bg-zinc-100 dark:bg-zinc-800"
-                                                        }`}>
-                                                            {exercise.difficulty}
-                                                        </span>
                                                         {isSelected && (
                                                             <span className="text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                                                                 Added
@@ -906,6 +906,27 @@ export default function Home() {
                             <span>10+ sets</span>
                         </div>
                     </div>
+
+                    {neglectedMuscles.length > 0 && (
+                        <div className="w-full mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                            <h3 className="text-yellow-800 dark:text-yellow-200 font-medium mb-2 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                Neglected Muscle Groups
+                            </h3>
+                            <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+                                The following muscles are not targeted by any exercise in your current plan:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {neglectedMuscles.map(muscle => (
+                                    <span key={muscle} className="px-2 py-1 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 text-xs rounded-full capitalize">
+                                        {muscle.replace('_', ' ')}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Workout Summary */}
                     {workoutStats.length > 0 && (
