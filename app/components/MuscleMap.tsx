@@ -21,7 +21,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
   const isPreview = (muscle: Muscle) => previewMuscles.includes(muscle);
 
   const getVolumeColor = (sets: number) => {
-    if (sets === 0) return '#ecf0f1';
+    if (sets === 0) return 'hsl(var(--muted))';
     if (sets < 3) return '#4ade80'; // Green-400 (Activation)
     if (sets < 6) return '#facc15'; // Yellow-400 (Moderate)
     if (sets < 10) return '#fb923c'; // Orange-400 (High)
@@ -29,18 +29,18 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
   };
 
   const getFill = (muscle: Muscle) => {
-    if (isPreview(muscle)) return '#f1c40f'; // Yellow for preview (Highlight)
+    if (isPreview(muscle)) return 'hsl(var(--chart-4))'; // Yellow/Gold
     
     // If volume data is provided, use it
     if (muscleVolume) {
       const sets = muscleVolume[muscle] || 0;
-      return sets > 0 ? getVolumeColor(sets) : '#ecf0f1';
+      return sets > 0 ? getVolumeColor(sets) : 'hsl(var(--muted))';
     }
 
     // Fallback to old Primary/Secondary logic
-    if (isPrimary(muscle)) return '#e74c3c'; // Red for primary
-    if (isSecondary(muscle)) return '#e67e22'; // Orange for secondary
-    return '#ecf0f1'; // Grey for default
+    if (isPrimary(muscle)) return 'hsl(var(--destructive))'; 
+    if (isSecondary(muscle)) return 'hsl(var(--chart-5))'; // Orange-ish
+    return 'hsl(var(--muted))'; // Grey for default
   };
 
   const getTitle = (muscle: Muscle) => {
@@ -56,22 +56,22 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
   };
 
   return (
-    <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" fill="#e0e0e0" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+    <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
       <style>
         {`
           path { transition: fill 0.3s ease; }
-          path:hover { fill: #bdc3c7; cursor: pointer; }
+          path:hover { fill: hsl(var(--accent)); cursor: pointer; }
         `}
       </style>
 
-      <text x="200" y="50" textAnchor="middle" fontSize="24" fill="#333" stroke="none">FRONT</text>
-      <text x="600" y="50" textAnchor="middle" fontSize="24" fill="#333" stroke="none">BACK</text>
+      <text x="200" y="50" textAnchor="middle" fontSize="24" fill="hsl(var(--foreground))" stroke="none">FRONT</text>
+      <text x="600" y="50" textAnchor="middle" fontSize="24" fill="hsl(var(--foreground))" stroke="none">BACK</text>
 
       {/* ================= FRONT VIEW ================= */}
       <g id="front-view">
         {/* Head */}
-        <path d="M185,70 Q200,50 215,70 L215,100 L185,100 Z" fill="#ecf0f1" stroke="none"/>
-        <circle cx="200" cy="70" r="25" fill="#ecf0f1" />
+        <path d="M185,70 Q200,50 215,70 L215,100 L185,100 Z" fill="hsl(var(--muted))" stroke="none"/>
+        <circle cx="200" cy="70" r="25" fill="hsl(var(--muted))" />
 
         {/* Traps (Neck) */}
         <path id="traps-front" d="M185,100 L160,115 L170,100 Z M215,100 L240,115 L230,100 Z" fill={getFill('traps')} onClick={() => handleClick('traps')}>
@@ -122,7 +122,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
       {/* ================= BACK VIEW ================= */}
       <g id="back-view">
         {/* Head (Back) */}
-        <circle cx="600" cy="70" r="25" fill="#ecf0f1" />
+        <circle cx="600" cy="70" r="25" fill="hsl(var(--muted))" />
 
         {/* Traps (Upper Back) */}
         <path id="traps" d="M585,100 L560,115 L580,140 L600,160 L620,140 L640,115 L615,100 Z" fill={getFill('traps')} onClick={() => handleClick('traps')}>

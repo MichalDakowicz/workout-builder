@@ -1,5 +1,12 @@
 import React from 'react';
 import { Exercise } from '../types';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 interface ExerciseModalProps {
   exercise: Exercise;
@@ -8,45 +15,33 @@ interface ExerciseModalProps {
 
 const ExerciseModal: React.FC<ExerciseModalProps> = ({ exercise, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
-        className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center sticky top-0 bg-white dark:bg-zinc-900 z-10">
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{exercise.name}</h2>
-            <div className="flex gap-2 mt-2">
-              <span className="px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 capitalize">
-                {exercise.equipment}
-              </span>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex justify-between items-start pr-8">
+            <div>
+                <DialogTitle className="text-2xl font-bold">{exercise.name}</DialogTitle>
+                <div className="flex gap-2 mt-2">
+                    <Badge variant="secondary" className="capitalize">
+                        {exercise.equipment}
+                    </Badge>
+                </div>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-          >
-            <svg className="w-6 h-6 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        </DialogHeader>
 
-        <div className="p-6 space-y-8">
+        <div className="space-y-8 py-4">
           {/* Muscles */}
           <div>
-            <h3 className="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">Muscles Targeted</h3>
+            <h3 className="text-lg font-semibold mb-3">Muscles Targeted</h3>
             <div className="flex flex-wrap gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <span className="text-sm font-medium text-red-700 dark:text-red-400 capitalize">{exercise.primaryMuscle.replace('_', ' ')}</span>
-                <span className="text-xs text-red-500 dark:text-red-500/80">(Primary)</span>
-              </div>
+              <Badge variant="destructive" className="px-3 py-1.5 text-sm font-medium capitalize">
+                {exercise.primaryMuscle.replace('_', ' ')} (Primary)
+              </Badge>
               {exercise.supportingMuscles.map(m => (
-                <div key={m} className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded-lg">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <span className="text-sm font-medium text-orange-700 dark:text-orange-400 capitalize">{m.replace('_', ' ')}</span>
-                </div>
+                <Badge key={m} variant="outline" className="px-3 py-1.5 text-sm font-medium capitalize">
+                  {m.replace('_', ' ')}
+                </Badge>
               ))}
             </div>
           </div>
@@ -54,14 +49,14 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({ exercise, onClose }) => {
           {/* Instructions */}
           {exercise.instructions && exercise.instructions.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">Instructions</h3>
+              <h3 className="text-lg font-semibold mb-3">Instructions</h3>
               <ol className="space-y-3">
                 {exercise.instructions.map((step, idx) => (
                   <li key={idx} className="flex gap-4">
-                    <span className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold">
+                    <span className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
                       {idx + 1}
                     </span>
-                    <p className="text-zinc-600 dark:text-zinc-300 leading-relaxed">{step}</p>
+                    <p className="text-muted-foreground leading-relaxed">{step}</p>
                   </li>
                 ))}
               </ol>
@@ -70,15 +65,15 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({ exercise, onClose }) => {
 
           {/* Video Panel */}
           {exercise.gifUrl && (
-            <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4">
-              <h3 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <div className="bg-muted/50 border rounded-xl p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Demonstration
               </h3>
-              <div className="w-full aspect-video bg-white dark:bg-zinc-800 rounded-lg overflow-hidden flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+              <div className="w-full aspect-video bg-background rounded-lg overflow-hidden flex items-center justify-center border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={exercise.gifUrl} alt={exercise.name} className="max-w-full max-h-full object-contain" />
               </div>
@@ -104,11 +99,9 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({ exercise, onClose }) => {
               </ul>
             </div>
           )}
-
-
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
