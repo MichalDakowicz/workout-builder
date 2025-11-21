@@ -32,6 +32,7 @@ export interface Exercise {
   instructions?: string[];
   tips?: string[];
   gifUrl?: string;
+  popularity?: number;
 }
 
 export type SetType = 'warmup' | 'normal' | 'failure' | 'dropset';

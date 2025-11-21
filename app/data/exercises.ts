@@ -34,6 +34,34 @@ const mapEquipment = (apiEquipment: string): Equipment => {
     return 'other';
 };
 
+const calculatePopularity = (name: string): number => {
+    const lower = name.toLowerCase();
+    let score = 50; // Base score
+
+    // High popularity keywords
+    if (lower.includes('bench press')) score += 40;
+    if (lower.includes('squat')) score += 40;
+    if (lower.includes('deadlift')) score += 40;
+    if (lower.includes('pull up') || lower.includes('chin up')) score += 35;
+    if (lower.includes('push up')) score += 30;
+    if (lower.includes('overhead press') || lower.includes('military press')) score += 35;
+    if (lower.includes('barbell row')) score += 30;
+    if (lower.includes('dip')) score += 30;
+
+    // Medium popularity modifiers
+    if (lower.includes('barbell')) score += 10;
+    if (lower.includes('dumbbell')) score += 5;
+    if (lower.includes('cable')) score += 5;
+
+    // Penalize obscure variations slightly to favor standard versions
+    if (lower.includes('single leg') || lower.includes('one arm')) score -= 10;
+    if (lower.includes('smith')) score -= 5;
+    if (lower.includes('machine')) score -= 5;
+    if (lower.includes('band')) score -= 10;
+
+    return Math.max(0, Math.min(100, score));
+};
+
 const uniqueExercises = new Map<string, Exercise>();
 
 // The JSON import might have a different structure depending on how it was saved.
@@ -56,7 +84,8 @@ rawExercises.forEach((item: any) => {
         equipment: mapEquipment(item.equipments[0] || ''),
         instructions: item.instructions,
         tips: [], // API doesn't provide tips in the same way, or we need to map them if available
-        gifUrl: item.gifUrl
+        gifUrl: item.gifUrl,
+        popularity: item.popularity || calculatePopularity(item.name)
     });
 });
 

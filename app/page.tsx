@@ -6,6 +6,7 @@ import { signInWithPopup } from "firebase/auth";
 import { exercises } from "./data/exercises";
 import { templates } from "./data/templates";
 import { WorkoutSet, Exercise } from "./types";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 // Components
 import MuscleMap from "./components/MuscleMap";
@@ -62,6 +63,7 @@ export default function Home() {
     const [viewMode, setViewMode] = useState<string>('workout');
     const [showTemplates, setShowTemplates] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const [isCompact, setIsCompact] = useState(false);
 
     const handleLogin = async () => {
         try {
@@ -80,7 +82,7 @@ export default function Home() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-background font-sans text-foreground relative">
+        <div className="flex flex-col h-screen overflow-hidden bg-background font-sans text-foreground relative">
             {selectedExercise && (
                 <ExerciseModal 
                     exercise={selectedExercise} 
@@ -115,15 +117,55 @@ export default function Home() {
                 onImport={handleImport}
             />
 
-            <main className="flex flex-col md:flex-row flex-1 p-6 gap-8">
-                {/* Exercise List / Library */}
-                <div className="w-full md:w-1/3 lg:w-1/4 flex flex-col gap-4">
-                    <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+            <main className="flex-1 container mx-auto max-w-7xl p-4 md:p-6 lg:p-8 flex flex-col lg:flex-row gap-8 overflow-hidden">
+                {/* Sidebar - Workout & Library */}
+                <div className="w-full lg:w-[400px] flex flex-col gap-4 shrink-0 h-full">
+                    <Tabs value={viewMode} onValueChange={setViewMode} className="w-full flex flex-col h-full">
+                        <TabsList className="grid w-full grid-cols-2 shrink-0">
                             <TabsTrigger value="workout">My Workout ({(workoutPlan[currentDay] || []).length})</TabsTrigger>
                             <TabsTrigger value="library">Library</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="library" className="space-y-4 mt-4">
+                        
+                        <TabsContent value="workout" className="flex-1 flex flex-col gap-4 mt-4 overflow-hidden">
+                            <div className="grid grid-cols-2 gap-2 shrink-0">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => setShowTemplates(true)}
+                                    className="w-full"
+                                >
+                                    Templates
+                                </Button>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button variant="outline" onClick={exportData} className="w-full px-2" title="Export">
+                                        Export
+                                    </Button>
+                                    <div className="relative w-full">
+                                        <Button variant="outline" className="w-full px-2" asChild title="Import">
+                                            <label className="cursor-pointer w-full h-full flex items-center justify-center">
+                                                Import
+                                                <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+                                            </label>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-hidden">
+                                <WorkoutDayView
+                                    currentDay={currentDay}
+                                    workoutPlan={workoutPlan}
+                                    allExercises={exercises}
+                                    onRemoveExercise={(id) => toggleExercise(id)}
+                                    onAddSet={addSet}
+                                    onRemoveSet={removeSet}
+                                    onUpdateSet={updateSet}
+                                    onOpenModal={setSelectedExercise}
+                                    onMoveExercise={moveExercise}
+                                />
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="library" className="flex-1 flex flex-col gap-4 mt-4 overflow-hidden">
                             <ExerciseFilters
                                 searchTerm={searchTerm}
                                 equipmentFilter={equipmentFilter}
@@ -131,77 +173,43 @@ export default function Home() {
                                 onSearchChange={setSearchTerm}
                                 onEquipmentChange={setEquipmentFilter}
                                 onBodyPartChange={setBodyPartFilter}
-                            />
+                            >
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setIsCompact(!isCompact)}
+                                    title={isCompact ? "Expanded View" : "Compact View"}
+                                >
+                                    {isCompact ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
+                                </Button>
+                            </ExerciseFilters>
                             <ExerciseList
                                 exercises={filteredExercises}
                                 onAddExercise={(ex) => toggleExercise(ex.id)}
                                 onOpenModal={setSelectedExercise}
+                                isCompact={isCompact}
                             />
-                        </TabsContent>
-                        <TabsContent value="workout" className="mt-4">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base">Current Day Exercises</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        {(workoutPlan[currentDay] || []).map((we, idx) => {
-                                            const ex = exercises.find(e => e.id === we.exerciseId);
-                                            if (!ex) return null;
-                                            return (
-                                                <div key={`${we.exerciseId}-${idx}`} className="p-2 text-sm border-b last:border-0">
-                                                    {ex.name}
-                                                </div>
-                                            );
-                                        })}
-                                        {(workoutPlan[currentDay] || []).length === 0 && (
-                                            <p className="text-muted-foreground text-sm">No exercises added.</p>
-                                        )}
-                                    </div>
-                                    <Button 
-                                        variant="secondary"
-                                        className="w-full mt-4"
-                                        onClick={() => setViewMode('library')}
-                                    >
-                                        Add Exercises
-                                    </Button>
-                                </CardContent>
-                            </Card>
                         </TabsContent>
                     </Tabs>
                 </div>
 
-                {/* Main Content - Workout View or Muscle Map */}
-                <div className="flex-1 flex flex-col gap-6">
-                    <div className="h-[600px]">
-                        <WorkoutDayView
-                            currentDay={currentDay}
-                            workoutPlan={workoutPlan}
-                            allExercises={exercises}
-                            onRemoveExercise={toggleExercise}
-                            onAddSet={addSet}
-                            onRemoveSet={removeSet}
-                            onUpdateSet={updateSet}
-                            onOpenModal={setSelectedExercise}
-                            onMoveExercise={moveExercise}
-                        />
-                    </div>
-                    
-                    <Card>
-                        <CardHeader>
+                {/* Main Content - Muscle Map */}
+                <div className="flex-1 flex flex-col gap-6 h-full overflow-hidden">
+                    <Card className="h-full flex flex-col overflow-hidden">
+                        <CardHeader className="shrink-0">
                             <CardTitle>Muscle Focus</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="h-[400px] flex items-center justify-center">
+                        <CardContent className="flex-1 flex items-center justify-center p-6 overflow-hidden">
+                            <div className="w-full h-full max-w-[600px] aspect-3/4">
                                 <MuscleMap 
                                     muscleVolume={
                                         (workoutPlan[currentDay] || []).reduce((acc, we) => {
                                             const ex = exercises.find(e => e.id === we.exerciseId);
                                             if (ex) {
-                                                // Count sets for primary muscle
                                                 acc[ex.primaryMuscle] = (acc[ex.primaryMuscle] || 0) + we.sets.length;
-                                                // Count partial sets for supporting muscles (optional, maybe 0.5 per set?)
-                                                // For now, let's just count primary muscles for the heat map
+                                                ex.supportingMuscles?.forEach((m) => {
+                                                    acc[m] = (acc[m] || 0) + (we.sets.length * 0.5);
+                                                });
                                             }
                                             return acc;
                                         }, {} as Record<string, number>)

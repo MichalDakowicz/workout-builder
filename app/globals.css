@@ -29,13 +29,13 @@
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 .dark {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --card: 240 10% 5%;
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
@@ -49,8 +49,8 @@
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 8%;
-  --input: 240 3.7% 8%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
@@ -107,6 +107,57 @@
   }
 }
 
+/* Blue Theme */
+.theme-blue {
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --ring: 221.2 83.2% 53.3%;
+}
+
+.dark .theme-blue, .theme-blue.dark {
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --ring: 217.2 91.2% 59.8%;
+}
+
+/* Green Theme */
+.theme-green {
+  --primary: 142.1 76.2% 36.3%;
+  --primary-foreground: 355.7 100% 97.3%;
+  --ring: 142.1 76.2% 36.3%;
+}
+
+.dark .theme-green, .theme-green.dark {
+  --primary: 142.1 70.6% 45.3%;
+  --primary-foreground: 144.9 80.4% 10%;
+  --ring: 142.1 70.6% 45.3%;
+}
+
+/* Orange Theme */
+.theme-orange {
+  --primary: 24.6 95% 53.1%;
+  --primary-foreground: 60 9.1% 97.8%;
+  --ring: 24.6 95% 53.1%;
+}
+
+.dark .theme-orange, .theme-orange.dark {
+  --primary: 20.5 90.2% 48.2%;
+  --primary-foreground: 60 9.1% 97.8%;
+  --ring: 20.5 90.2% 48.2%;
+}
+
+@layer utilities {
+  .mask-linear-fade {
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
 
 body {
     background: var(--background);

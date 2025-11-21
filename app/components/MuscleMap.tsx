@@ -59,8 +59,8 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
     <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
       <style>
         {`
-          path { transition: fill 0.3s ease; }
-          path:hover { fill: hsl(var(--accent)); cursor: pointer; }
+          path { transition: all 0.3s ease; }
+          path:hover { fill: hsl(var(--primary)); opacity: 0.8; cursor: pointer; }
         `}
       </style>
 

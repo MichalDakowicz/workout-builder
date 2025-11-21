@@ -20,7 +20,7 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({ exercise, onClose }) => {
         <DialogHeader>
           <div className="flex justify-between items-start pr-8">
             <div>
-                <DialogTitle className="text-2xl font-bold">{exercise.name}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold capitalize">{exercise.name}</DialogTitle>
                 <div className="flex gap-2 mt-2">
                     <Badge variant="secondary" className="capitalize">
                         {exercise.equipment}

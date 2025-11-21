@@ -89,7 +89,7 @@ export const WorkoutDayView: React.FC<WorkoutDayViewProps> = ({
                                                     <ChevronDown size={14} />
                                                 </Button>
                                             </div>
-                                            <h3 className="font-medium">{details.name}</h3>
+                                            <h3 className="font-medium capitalize">{details.name}</h3>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"

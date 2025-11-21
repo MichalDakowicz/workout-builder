@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Workout Builder",
   description: "Build your perfect workout routine with ease.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

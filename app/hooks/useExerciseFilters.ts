@@ -66,7 +66,12 @@ export function useExerciseFilters() {
                 if (!aIsPrimary && bIsPrimary) return 1;
             }
 
-            // 2. Alphabetical sort as secondary
+            // 2. Sort by popularity (descending)
+            const popA = a.popularity || 0;
+            const popB = b.popularity || 0;
+            if (popA !== popB) return popB - popA;
+
+            // 3. Alphabetical sort as fallback
             return a.name.localeCompare(b.name);
         });
     }, [searchTerm, equipmentFilter, bodyPartFilter]);
