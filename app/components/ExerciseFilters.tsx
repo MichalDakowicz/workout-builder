@@ -1,22 +1,22 @@
-import React from 'react';
+import React from "react";
 import { Equipment, Muscle } from "../types";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 
 interface ExerciseFiltersProps {
     searchTerm: string;
-    equipmentFilter: Equipment | 'all';
-    bodyPartFilter: Muscle | 'all';
+    equipmentFilter: Equipment | "all";
+    bodyPartFilter: Muscle | "all";
     onSearchChange: (term: string) => void;
-    onEquipmentChange: (equipment: Equipment | 'all') => void;
-    onBodyPartChange: (bodyPart: Muscle | 'all') => void;
+    onEquipmentChange: (equipment: Equipment | "all") => void;
+    onBodyPartChange: (bodyPart: Muscle | "all") => void;
     children?: React.ReactNode;
 }
 
@@ -27,7 +27,7 @@ export const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
     onSearchChange,
     onEquipmentChange,
     onBodyPartChange,
-    children
+    children,
 }) => {
     return (
         <div className="space-y-3">
@@ -42,7 +42,7 @@ export const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
                     />
                     {searchTerm && (
                         <button
-                            onClick={() => onSearchChange('')}
+                            onClick={() => onSearchChange("")}
                             className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                             <X size={16} />
@@ -55,7 +55,9 @@ export const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
             <div className="flex gap-2">
                 <Select
                     value={equipmentFilter}
-                    onValueChange={(value) => onEquipmentChange(value as Equipment | 'all')}
+                    onValueChange={(value) =>
+                        onEquipmentChange(value as Equipment | "all")
+                    }
                 >
                     <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Equipment" />
@@ -72,14 +74,18 @@ export const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
 
                 <Select
                     value={bodyPartFilter}
-                    onValueChange={(value) => onBodyPartChange(value as Muscle | 'all')}
+                    onValueChange={(value) =>
+                        onBodyPartChange(value as Muscle | "all")
+                    }
                 >
                     <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Body Part" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Body Parts</SelectItem>
-                        <SelectItem value="pectorals">Chest (Pectorals)</SelectItem>
+                        <SelectItem value="pectorals">
+                            Chest (Pectorals)
+                        </SelectItem>
                         <SelectItem value="lats">Back (Lats)</SelectItem>
                         <SelectItem value="traps">Traps</SelectItem>
                         <SelectItem value="lower_back">Lower Back</SelectItem>
@@ -95,6 +101,7 @@ export const ExerciseFilters: React.FC<ExerciseFiltersProps> = ({
                         <SelectItem value="hamstrings">Hamstrings</SelectItem>
                         <SelectItem value="glutes">Glutes</SelectItem>
                         <SelectItem value="calves">Calves</SelectItem>
+                        <SelectItem value="shins">Shins</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

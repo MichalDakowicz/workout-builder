@@ -8,6 +8,7 @@ export type Muscle =
     | "obliques"
     | "quadriceps"
     | "calves"
+    | "shins"
     | "triceps"
     | "upper_back"
     | "lats"

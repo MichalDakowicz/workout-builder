@@ -33,6 +33,7 @@ const mapMuscle = (apiMuscle: string): Muscle | null => {
         lower.includes("gastrocnemius")
     )
         return "calves";
+    if (lower.includes("shin")) return "shins";
 
     return null;
 };
