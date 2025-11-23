@@ -3,6 +3,7 @@ import { Exercise } from "../types";
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { formatMuscleName } from "@/lib/utils";
 
 interface ExerciseListProps {
     exercises: Exercise[];
@@ -22,19 +23,19 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             {exercises.map(exercise => (
                 <Card
                     key={exercise.id}
-                    className={`hover:border-primary transition-colors cursor-pointer ${isCompact ? 'py-1' : ''}`}
+                    className={`glass-panel border-white/5 hover:border-primary/50 hover:bg-white/5 transition-all cursor-pointer group ${isCompact ? 'py-1' : ''}`}
                     onClick={() => onOpenModal(exercise)}
                 >
                     <CardContent className={`flex justify-between items-center ${isCompact ? 'p-2' : 'p-3 items-start'}`}>
                         <div className={isCompact ? "flex items-center gap-2 flex-1 overflow-hidden" : ""}>
-                            <h3 className={`font-medium capitalize ${isCompact ? 'text-sm truncate' : ''}`}>{exercise.name}</h3>
+                            <h3 className={`font-medium capitalize text-foreground group-hover:text-primary transition-colors ${isCompact ? 'text-sm truncate' : ''}`}>{exercise.name}</h3>
                             {isCompact ? (
-                                <span className="text-xs text-muted-foreground shrink-0">
-                                    • {exercise.primaryMuscle}
+                                <span className="text-xs text-muted-foreground shrink-0 font-mono">
+                                    • {formatMuscleName(exercise.primaryMuscle)}
                                 </span>
                             ) : (
-                                <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                                    <span className="capitalize">{exercise.primaryMuscle}</span>
+                                <div className="flex gap-2 mt-1 text-xs text-muted-foreground font-mono">
+                                    <span className="capitalize text-neon-cyan">{formatMuscleName(exercise.primaryMuscle)}</span>
                                     <span>•</span>
                                     <span className="capitalize">{exercise.equipment || 'Bodyweight'}</span>
                                 </div>
@@ -47,7 +48,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
                                 e.stopPropagation();
                                 onAddExercise(exercise);
                             }}
-                            className={`hover:text-primary ${isCompact ? 'h-6 w-6' : 'h-8 w-8'}`}
+                            className={`text-muted-foreground hover:text-neon-cyan hover:bg-neon-cyan/10 ${isCompact ? 'h-6 w-6' : 'h-8 w-8'}`}
                         >
                             <Plus size={isCompact ? 14 : 18} />
                         </Button>

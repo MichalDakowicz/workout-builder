@@ -16,7 +16,8 @@ export type Muscle =
     | "glutes"
     | "hamstrings"
     | "adductors"
-    | "abductors";
+    | "abductors"
+    | "rear_deltoids";
 
 export type Equipment =
     | "barbell"

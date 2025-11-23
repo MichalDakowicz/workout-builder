@@ -5,44 +5,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.75rem;
-}
-
-.dark {
+    /* Deep Matte Charcoal Background */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
+
+    /* Glass Panel Colors */
     --card: 240 10% 5%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 5%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+
+    /* Neon Accents */
+    --primary: 263 90% 66%; /* Neon Violet */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 189 94% 43%; /* Neon Cyan */
+    --secondary-foreground: 240 5.9% 10%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
@@ -51,12 +28,50 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --ring: 263 90% 66%;
+
+    /* Chart/Data Colors (Neon Palette) */
+    --chart-1: 189 94% 43%; /* Cyan */
+    --chart-2: 263 90% 66%; /* Violet */
+    --chart-3: 300 76% 72%; /* Magenta */
+    --chart-4: 27 96% 61%; /* Orange */
+    --chart-5: 0 0% 100%; /* White */
+
+    --radius: 0.75rem;
+
+    /* Custom Neon Variables */
+    --neon-cyan-light: #49e7ff;
+    --neon-cyan: #0a9cb6;
+    --neon-violet: #8b5cf6;
+    --neon-magenta: #d946ef;
+    --neon-orange: #f97316;
+}
+
+.dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263 90% 66%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 189 94% 43%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 90% 66%;
+    --chart-1: 189 94% 43%;
+    --chart-2: 263 90% 66%;
+    --chart-3: 300 76% 72%;
+    --chart-4: 27 96% 61%;
+    --chart-5: 0 0% 100%;
 }
 
 @theme inline {
@@ -107,84 +122,6 @@
     }
 }
 
-/* Blue Theme */
-.theme-blue {
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --ring: 221.2 83.2% 53.3%;
-}
-
-.dark .theme-blue,
-.theme-blue.dark {
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --ring: 217.2 91.2% 59.8%;
-}
-
-/* Green Theme */
-.theme-green {
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --ring: 142.1 76.2% 36.3%;
-}
-
-.dark .theme-green,
-.theme-green.dark {
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --ring: 142.1 70.6% 45.3%;
-}
-
-/* Orange Theme */
-.theme-orange {
-    --primary: 24.6 95% 53.1%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --ring: 24.6 95% 53.1%;
-}
-
-.dark .theme-orange,
-.theme-orange.dark {
-    --primary: 20.5 90.2% 48.2%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --ring: 20.5 90.2% 48.2%;
-}
-
-.theme-purple {
-    --primary: 271.4 76.5% 53.1%;
-    --primary-foreground: 255.6 100% 98.2%;
-    --ring: 271.4 76.5% 53.1%;
-}
-.dark .theme-purple,
-.theme-purple.dark {
-    --primary: 271.4 76.5% 63.1%;
-    --primary-foreground: 255.6 100% 12.2%;
-    --ring: 271.4 76.5% 63.1%;
-}
-
-.theme-red {
-    --primary: 0 84.2% 60.2%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 0 84.2% 60.2%;
-}
-.dark .theme-red,
-.theme-red.dark {
-    --primary: 0 62.8% 30.6%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 0 62.8% 30.6%;
-}
-
-.theme-teal {
-    --primary: 174.3 72.4% 41.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --ring: 174.3 72.4% 41.8%;
-}
-.dark .theme-teal,
-.theme-teal.dark {
-    --primary: 174.3 72.4% 51.8%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --ring: 174.3 72.4% 51.8%;
-}
-
 @layer utilities {
     .mask-linear-fade {
         mask-image: linear-gradient(to right, black 85%, transparent 100%);
@@ -196,10 +133,71 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+
+    /* Bio-Data Flow Utilities */
+    .bg-grid-pattern {
+        background-size: 40px 40px;
+        background-image: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.03) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.03) 1px,
+                transparent 1px
+            );
+    }
+
+    .glass-panel {
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .text-glow {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .neon-glow-cyan {
+        filter: drop-shadow(0 0 5px var(--neon-cyan));
+    }
+
+    .neon-glow-violet {
+        filter: drop-shadow(0 0 8px var(--neon-violet));
+    }
+
+    .neon-glow-magenta {
+        filter: drop-shadow(0 0 8px var(--neon-magenta));
+    }
+
+    .neon-glow-orange {
+        filter: drop-shadow(0 0 10px var(--neon-orange));
+    }
 }
 
 body {
     background: var(--background);
     color: var(--foreground);
     font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

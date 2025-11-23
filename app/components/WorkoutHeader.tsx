@@ -6,8 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LogOut, Upload, Download, FileJson } from "lucide-react";
-import { ModeToggle } from "@/components/mode-toggle";
-import { AccentPicker } from "@/components/accent-picker";
 
 interface WorkoutHeaderProps {
     user: User | null;
@@ -64,17 +62,20 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                                     }
                                     size="sm"
                                     onClick={() => onSetCurrentDay(day)}
-                                    className={`gap-2 whitespace-nowrap rounded-full h-8 ${
-                                        currentDay === day
+                                    className={`gap-2 whitespace-nowrap rounded-full h-8 ${currentDay === day
                                             ? ""
                                             : "text-muted-foreground hover:text-foreground"
-                                    }`}
+                                        }`}
                                 >
                                     Day {day}
                                     {exerciseCount > 0 && (
-                                        <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                                        <Badge
+                                            className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums flex items-center justify-center"
+                                            variant={currentDay === day ? "outline" : undefined}
+
+                                        >
                                             {exerciseCount}
-                                        </span>
+                                        </Badge>
                                     )}
                                 </Button>
                             );
@@ -88,11 +89,10 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                                 <button
                                     key={days}
                                     onClick={() => onSetTrainingDays(days)}
-                                    className={`h-6 w-6 rounded-full text-[10px] flex items-center justify-center transition-colors ${
-                                        trainingDays === days
+                                    className={`h-6 w-6 rounded-full text-[10px] flex items-center justify-center transition-colors ${trainingDays === days
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                    }`}
+                                        }`}
                                 >
                                     {days}
                                 </button>
@@ -102,8 +102,6 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                    <AccentPicker />
-                    <ModeToggle />
                     {user ? (
                         <div className="flex items-center gap-3 pl-2 border-l ml-2">
                             <Avatar className="h-8 w-8 border">

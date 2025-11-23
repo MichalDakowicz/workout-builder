@@ -21,24 +21,43 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
     const isPreview = (muscle: Muscle) => previewMuscles.includes(muscle);
 
     const getVolumeColor = (sets: number) => {
-        if (sets === 0) return "hsl(var(--muted))";
-        if (sets < 3) return "#4ade80"; // Green
-        if (sets < 6) return "#facc15"; // Yellow
-        if (sets < 10) return "#fb923c"; // Orange
-        return "#f87171"; // Red
+        if (sets === 0) return "rgba(255, 255, 255, 0.1)"; // Base glass fill
+        if (sets < 3) return "var(--neon-cyan-light)"; // Cold / Start
+        if (sets < 6) return "var(--neon-cyan)"; // Low
+        if (sets < 9) return "var(--neon-violet)"; // Optimal
+        if (sets < 13) return "var(--neon-magenta)"; // High
+        return "var(--neon-orange)"; // Overheat
     };
 
     const getFill = (muscle: Muscle) => {
-        if (isPreview(muscle)) return "hsl(var(--chart-4))";
+        if (isPreview(muscle)) return "var(--neon-cyan)";
 
         if (muscleVolume) {
             const sets = muscleVolume[muscle] || 0;
-            return sets > 0 ? getVolumeColor(sets) : "hsl(var(--muted))";
+            return getVolumeColor(sets);
         }
 
-        if (isPrimary(muscle)) return "hsl(var(--destructive))";
-        if (isSecondary(muscle)) return "hsl(var(--chart-5))";
-        return "hsl(var(--muted))";
+        if (isPrimary(muscle)) return "var(--neon-violet)";
+        if (isSecondary(muscle)) return "var(--neon-cyan)";
+        return "rgba(255, 255, 255, 0.1)"; // Base glass fill
+    };
+
+    const getFilter = (muscle: Muscle) => {
+        if (isPreview(muscle)) return "drop-shadow(0 0 8px var(--neon-cyan))";
+
+        if (muscleVolume) {
+            const sets = muscleVolume[muscle] || 0;
+            if (sets === 0) return "none";
+            if (sets < 3) return "drop-shadow(0 0 5px var(--neon-cyan-light))";
+            if (sets < 6) return "drop-shadow(0 0 5px var(--neon-cyan))";
+            if (sets < 9) return "drop-shadow(0 0 8px var(--neon-violet))";
+            if (sets < 13) return "drop-shadow(0 0 8px var(--neon-magenta))";
+            return "drop-shadow(0 0 10px var(--neon-orange))";
+        }
+
+        if (isPrimary(muscle)) return "drop-shadow(0 0 8px var(--neon-violet))";
+        if (isSecondary(muscle)) return "drop-shadow(0 0 5px var(--neon-cyan))";
+        return "none";
     };
 
     const getTitle = (muscle: Muscle) => {
@@ -52,11 +71,20 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
         if (onMuscleClick) onMuscleClick(muscle);
     };
 
-    const groupStyle = { cursor: "pointer", transition: "all 0.2s ease" };
+    const groupStyle = {
+        cursor: "pointer",
+        transition: "all 0.3s ease-out",
+        stroke: "rgba(255,255,255,0.3)",
+    };
 
     // Common hover style for both SVGs
     const hoverStyle = `
-    g[data-muscle]:hover path { opacity: 0.8; fill: hsl(var(--primary)) !important; }
+    g[data-muscle]:hover path { 
+        opacity: 1; 
+        fill: var(--neon-cyan-light) !important; 
+        filter: drop-shadow(0 0 10px var(--neon-cyan-light));
+        stroke: rgba(255,255,255,0.8);
+    }
     svg { overflow: visible; }
   `;
 
@@ -68,16 +96,13 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
           FRONT VIEW
       ========================================================= */}
             <div className="flex-1 h-full relative">
-                <div className="text-center font-bold mb-2 text-muted-foreground">
-                    FRONT
-                </div>
                 <svg
                     viewBox="0 0 8492 16009"
                     version="1.1"
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-full h-full max-h-[80vh]"
                 >
-                    <g id="Front-Artboard">
+                    <g id="Front-Artboard" strokeWidth="8">
                         {/* Non-Interactive */}
                         <g
                             id="neck-head-front"
@@ -127,6 +152,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="trapezius-front"
                             data-muscle="traps"
                             fill={getFill("traps")}
+                            filter={getFilter("traps")}
                             onClick={() => handleClick("traps")}
                             style={groupStyle}
                         >
@@ -139,6 +165,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="shoulders-front"
                             data-muscle="shoulders"
                             fill={getFill("shoulders")}
+                            filter={getFilter("shoulders")}
                             onClick={() => handleClick("shoulders")}
                             style={groupStyle}
                         >
@@ -153,6 +180,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="pectorals"
                             data-muscle="pectorals"
                             fill={getFill("pectorals")}
+                            filter={getFilter("pectorals")}
                             onClick={() => handleClick("pectorals")}
                             style={groupStyle}
                         >
@@ -165,6 +193,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="biceps"
                             data-muscle="biceps"
                             fill={getFill("biceps")}
+                            filter={getFilter("biceps")}
                             onClick={() => handleClick("biceps")}
                             style={groupStyle}
                         >
@@ -179,6 +208,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="forearms-front"
                             data-muscle="forearms"
                             fill={getFill("forearms")}
+                            filter={getFilter("forearms")}
                             onClick={() => handleClick("forearms")}
                             style={groupStyle}
                         >
@@ -197,6 +227,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="abdominals"
                             data-muscle="abdominals"
                             fill={getFill("abdominals")}
+                            filter={getFilter("abdominals")}
                             onClick={() => handleClick("abdominals")}
                             style={groupStyle}
                         >
@@ -215,6 +246,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="obliques"
                             data-muscle="obliques"
                             fill={getFill("obliques")}
+                            filter={getFilter("obliques")}
                             onClick={() => handleClick("obliques")}
                             style={groupStyle}
                         >
@@ -237,6 +269,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="quadriceps"
                             data-muscle="quadriceps"
                             fill={getFill("quadriceps")}
+                            filter={getFilter("quadriceps")}
                             onClick={() => handleClick("quadriceps")}
                             style={groupStyle}
                         >
@@ -255,6 +288,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="inner-thighs"
                             data-muscle="adductors"
                             fill={getFill("adductors")}
+                            filter={getFilter("adductors")}
                             onClick={() => handleClick("adductors")}
                             style={groupStyle}
                         >
@@ -268,6 +302,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="calves-front"
                             data-muscle="calves"
                             fill={getFill("calves")}
+                            filter={getFilter("calves")}
                             onClick={() => handleClick("calves")}
                             style={groupStyle}
                         >
@@ -282,6 +317,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="shins"
                             data-muscle="shins"
                             fill={getFill("shins")}
+                            filter={getFilter("shins")}
                             onClick={() => handleClick("shins")}
                             style={groupStyle}
                         >
@@ -306,16 +342,13 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
           BACK VIEW
       ========================================================= */}
             <div className="flex-1 h-full relative">
-                <div className="text-center font-bold mb-2 text-muted-foreground">
-                    BACK
-                </div>
                 <svg
                     viewBox="0 0 2013 3842"
                     version="1.1"
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-full h-full max-h-[80vh]"
                 >
-                    <g id="Back-Artboard">
+                    <g id="Back-Artboard" strokeWidth="2">
                         {/* Non-Interactive */}
                         <g
                             id="neck-head-back"
@@ -358,6 +391,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="lats"
                             data-muscle="lats"
                             fill={getFill("lats")}
+                            filter={getFilter("lats")}
                             onClick={() => handleClick("lats")}
                             style={groupStyle}
                         >
@@ -378,6 +412,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="glutes-back"
                             data-muscle="glutes"
                             fill={getFill("glutes")}
+                            filter={getFilter("glutes")}
                             onClick={() => handleClick("glutes")}
                             style={groupStyle}
                         >
@@ -394,6 +429,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="upper-back"
                             data-muscle="upper_back"
                             fill={getFill("upper_back")}
+                            filter={getFilter("upper_back")}
                             onClick={() => handleClick("upper_back")}
                             style={groupStyle}
                         >
@@ -420,6 +456,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="abductors"
                             data-muscle="abductors"
                             fill={getFill("abductors")}
+                            filter={getFilter("abductors")}
                             onClick={() => handleClick("abductors")}
                             style={groupStyle}
                         >
@@ -433,6 +470,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="hamstrings"
                             data-muscle="hamstrings"
                             fill={getFill("hamstrings")}
+                            filter={getFilter("hamstrings")}
                             onClick={() => handleClick("hamstrings")}
                             style={groupStyle}
                         >
@@ -447,12 +485,13 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
 
                         <g
                             id="rear-delts"
-                            data-muscle="shoulders"
-                            fill={getFill("shoulders")}
-                            onClick={() => handleClick("shoulders")}
+                            data-muscle="rear_deltoids"
+                            fill={getFill("rear_deltoids")}
+                            filter={getFilter("rear_deltoids")}
+                            onClick={() => handleClick("rear_deltoids")}
                             style={groupStyle}
                         >
-                            <title>{getTitle("shoulders")}</title>
+                            <title>{getTitle("rear_deltoids")}</title>
                             <path d="M1466.258,889.608c-0.688,24.054 -1.767,39.492 -10.683,66.4c-6.342,19.137 -16.392,6.325 -25.821,-2.333c-51.854,-47.625 -153.7,-172.471 -155.812,-177.188c-3.458,-7.733 3.1,-12.217 24.058,-19.983c22.425,-8.308 98.8,-22.242 137.921,28.529c11.417,14.813 24.458,40.542 29.363,79.471c1.317,10.467 0.712,10.458 0.971,25.104l0.004,-0Z" />
                             <path d="M553.571,815.163c10.275,-22.725 14.1,-26.408 21.842,-35.283c36.788,-42.163 111.388,-36.917 151.704,-15.358c12.55,6.712 4.321,13.875 1.258,17.721c-36.521,45.817 -58.979,71.667 -64.275,77.758c-5.104,5.875 -39.275,45.204 -65.258,72.133c-31.712,32.863 -36.083,35.667 -42.771,32.696c-3.792,-1.688 -10.504,-23.875 -13.029,-41.804c-9.033,-64.121 9.35,-104.554 10.529,-107.858l0,-0.004Z" />
                         </g>
@@ -479,6 +518,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="triceps"
                             data-muscle="triceps"
                             fill={getFill("triceps")}
+                            filter={getFilter("triceps")}
                             onClick={() => handleClick("triceps")}
                             style={groupStyle}
                         >
@@ -495,6 +535,7 @@ const MuscleMap: React.FC<MuscleMapProps> = ({
                             id="lower-back"
                             data-muscle="lower_back"
                             fill={getFill("lower_back")}
+                            filter={getFilter("lower_back")}
                             onClick={() => handleClick("lower_back")}
                             style={groupStyle}
                         >

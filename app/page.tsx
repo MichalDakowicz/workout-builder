@@ -85,7 +85,7 @@ export default function Home() {
 
     return (
         <>
-            <div className="flex flex-col h-screen overflow-hidden bg-background font-sans text-foreground relative">
+            <div className="flex flex-col h-screen overflow-hidden bg-background font-sans text-foreground relative bg-grid-pattern">
                 {selectedExercise && (
                     <ExerciseModal
                         exercise={selectedExercise}
@@ -128,12 +128,12 @@ export default function Home() {
                             onValueChange={setViewMode}
                             className="w-full flex flex-col h-full"
                         >
-                            <TabsList className="grid w-full grid-cols-2 shrink-0">
-                                <TabsTrigger value="workout">
+                            <TabsList className="grid w-full grid-cols-2 shrink-0 glass-panel border-0">
+                                <TabsTrigger value="workout" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                                     My Workout (
                                     {(workoutPlan[currentDay] || []).length})
                                 </TabsTrigger>
-                                <TabsTrigger value="library">
+                                <TabsTrigger value="library" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                                     Library
                                 </TabsTrigger>
                             </TabsList>
@@ -146,7 +146,7 @@ export default function Home() {
                                     <Button
                                         variant="outline"
                                         onClick={() => setShowTemplates(true)}
-                                        className="w-full"
+                                        className="w-full glass-panel border-white/10 hover:bg-white/5 hover:text-primary"
                                     >
                                         Templates
                                     </Button>
@@ -154,7 +154,7 @@ export default function Home() {
                                         <Button
                                             variant="outline"
                                             onClick={exportData}
-                                            className="w-full px-2"
+                                            className="w-full px-2 glass-panel border-white/10 hover:bg-white/5 hover:text-primary"
                                             title="Export"
                                         >
                                             Export
@@ -162,7 +162,7 @@ export default function Home() {
                                         <div className="relative w-full">
                                             <Button
                                                 variant="outline"
-                                                className="w-full px-2"
+                                                className="w-full px-2 glass-panel border-white/10 hover:bg-white/5 hover:text-primary"
                                                 asChild
                                                 title="Import"
                                             >
@@ -213,6 +213,7 @@ export default function Home() {
                                         variant="outline"
                                         size="icon"
                                         onClick={() => setIsCompact(!isCompact)}
+                                        className="glass-panel border-white/10 hover:bg-white/5 hover:text-primary"
                                         title={
                                             isCompact
                                                 ? "Expanded View"
@@ -240,12 +241,10 @@ export default function Home() {
 
                     {/* Main Content - Muscle Map */}
                     <div className="flex-1 flex flex-col gap-6 h-full overflow-hidden">
-                        <Card className="h-full flex flex-col overflow-hidden">
-                            <CardHeader className="shrink-0">
-                                <CardTitle>Muscle Focus</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex items-center justify-center p-6 overflow-hidden">
-                                <div className="w-full h-full max-w-[600px] aspect-3/4">
+                        <Card className="h-full flex flex-col overflow-hidden glass-panel border-white/10">
+                            <CardContent className="flex-1 flex items-center justify-center p-6 overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+                                <div className="w-full h-full max-w-[600px] aspect-3/4 relative z-10">
                                     <MuscleMap
                                         muscleVolume={(
                                             workoutPlan[currentDay] || []
@@ -262,7 +261,7 @@ export default function Home() {
                                                         acc[m] =
                                                             (acc[m] || 0) +
                                                             we.sets.length *
-                                                                0.5;
+                                                            0.5;
                                                     }
                                                 );
                                             }

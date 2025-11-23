@@ -9,6 +9,7 @@ const mapMuscle = (apiMuscle: string): Muscle | null => {
         return "forearms";
     if (lower.includes("chest") || lower.includes("pectoral"))
         return "pectorals";
+    if (lower.includes("rear delt")) return "rear_deltoids";
     if (lower.includes("deltoid") || lower.includes("shoulder"))
         return "shoulders";
     if (lower.includes("trap") || lower.includes("neck")) return "traps";
