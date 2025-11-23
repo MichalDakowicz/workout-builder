@@ -17629,7 +17629,7 @@
     },
     {
       "exerciseId": "DhMl549",
-      "name": "barbell full squat (back pov)",
+      "name": "barbell back squat (back pov)",
       "gifUrl": "https://static.exercisedb.dev/media/DhMl549.gif",
       "targetMuscles": [
         "glutes"
@@ -19224,7 +19224,7 @@
     },
     {
       "exerciseId": "qXTaZnJ",
-      "name": "barbell full squat",
+      "name": "barbell back squat",
       "gifUrl": "https://static.exercisedb.dev/media/qXTaZnJ.gif",
       "targetMuscles": [
         "glutes"
@@ -20197,7 +20197,7 @@
     },
     {
       "exerciseId": "iYzB0Cz",
-      "name": "barbell full squat (side pov)",
+      "name": "barbell back squat (side pov)",
       "gifUrl": "https://static.exercisedb.dev/media/iYzB0Cz.gif",
       "targetMuscles": [
         "glutes"
@@ -20893,7 +20893,7 @@
     },
     {
       "exerciseId": "NNoHCEA",
-      "name": "smith full squat",
+      "name": "smith back squat",
       "gifUrl": "https://static.exercisedb.dev/media/NNoHCEA.gif",
       "targetMuscles": [
         "glutes"

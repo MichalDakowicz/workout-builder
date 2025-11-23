@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Group ID Labeler</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; margin-right: auto; }
+
+        /* The container where the SVG lives */
+        #workspace {
+            flex-grow: 1;
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            overflow: auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SVG Styling within the workspace */
+        #workspace svg {
+            max-width: 95%;
+            max-height: 95%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Visual feedback classes */
+        .hovered-group {
+            outline: 2px dashed #3498db; /* Blue outline on hover */
+            cursor: pointer;
+        }
+
+        .selected-group {
+            outline: 3px solid #e74c3c !important; /* Red outline when editing */
+        }
+
+        .has-id-group {
+            outline: 2px solid #27ae60; /* Green outline if ID exists */
+        }
+
+        /* The Popup Input */
+        #id-popup {
+            position: absolute;
+            display: none;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border: 1px solid #ddd;
+            min-width: 200px;
+        }
+
+        #id-popup h3 { margin: 0 0 10px 0; font-size: 14px; color: #666; }
+        
+        #id-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-cancel { background-color: #95a5a6; color: white; margin-right: 5px; }
+        
+        .btn:hover { opacity: 0.9; }
+
+        /* Helper text */
+        #status { font-size: 0.9rem; color: #666; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏋️ Workout SVG Labeler</h1>
+        <input type="file" id="file-input" accept=".svg">
+        <div id="status">Upload an SVG to start</div>
+        <button class="btn btn-success" onclick="downloadSVG()">Download Result</button>
+    </header>
+
+    <div id="workspace">
+        <!-- SVG will be injected here -->
+        <p style="color: #ccc; user-select: none;">No SVG loaded</p>
+    </div>
+
+    <!-- Hidden Popup Form -->
+    <div id="id-popup">
+        <h3>Set Group ID</h3>
+        <input type="text" id="id-input" placeholder="e.g., biceps-left" autocomplete="off">
+        <div style="text-align: right;">
+            <button class="btn btn-cancel" onclick="closePopup()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveId()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const workspace = document.getElementById('workspace');
+        const popup = document.getElementById('id-popup');
+        const idInput = document.getElementById('id-input');
+        const statusText = document.getElementById('status');
+
+        let activeGroup = null; // Stores the currently selected <g> element
+
+        // 1. Handle File Upload
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // Inject SVG into workspace
+                workspace.innerHTML = event.target.result;
+                statusText.textContent = "Hover over parts to select groups.";
+                attachHoverListeners();
+            };
+            reader.readAsText(file);
+        });
+
+        // 2. Hover Effects (Event Delegation)
+        function attachHoverListeners() {
+            const svg = workspace.querySelector('svg');
+            if (!svg) return;
+
+            // Remove inline dimensions so it fits our container
+            svg.removeAttribute('width');
+            svg.removeAttribute('height');
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+
+            // Hover In
+            svg.addEventListener('mouseover', (e) => {
+                if(popup.style.display === 'block') return; // Don't hover if popup is open
+
+                const group = e.target.closest('g');
+                if (group && group !== svg) {
+                    group.classList.add('hovered-group');
+                }
+            });
+
+            // Hover Out
+            svg.addEventListener('mouseout', (e) => {
+                const group = e.target.closest('g');
+                if (group) {
+                    group.classList.remove('hovered-group');
+                }
+            });
+
+            // Click to Edit
+            svg.addEventListener('click', (e) => {
+                const group = e.target.closest('g');
+                if (group && group !== svg) {
+                    e.stopPropagation(); // Prevent clicking the background
+                    openPopup(group, e.pageX, e.pageY);
+                }
+            });
+        }
+
+        // 3. Open Popup logic
+        function openPopup(group, x, y) {
+            // Remove hover effects
+            document.querySelectorAll('.hovered-group').forEach(el => el.classList.remove('hovered-group'));
+            
+            // Highlight selected
+            if (activeGroup) activeGroup.classList.remove('selected-group');
+            activeGroup = group;
+            activeGroup.classList.add('selected-group');
+
+            // Position popup
+            popup.style.display = 'block';
+            popup.style.left = `${x + 10}px`;
+            popup.style.top = `${y + 10}px`;
+
+            // Fill input with existing ID if present
+            idInput.value = activeGroup.getAttribute('id') || '';
+            idInput.focus();
+        }
+
+        // 4. Save ID logic
+        function saveId() {
+            if (!activeGroup) return;
+
+            const newId = idInput.value.trim();
+            
+            if (newId) {
+                activeGroup.setAttribute('id', newId);
+                activeGroup.classList.add('has-id-group'); // Visual feedback that it's done
+                console.log(`Group labeled: ${newId}`);
+            } else {
+                activeGroup.removeAttribute('id');
+                activeGroup.classList.remove('has-id-group');
+            }
+
+            closePopup();
+        }
+
+        // 5. Close Popup
+        function closePopup() {
+            popup.style.display = 'none';
+            if (activeGroup) {
+                activeGroup.classList.remove('selected-group');
+                activeGroup = null;
+            }
+        }
+
+        // Close popup on Escape key, Save on Enter
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") closePopup();
+            if (e.key === "Enter" && popup.style.display === 'block') saveId();
+        });
+
+        // 6. Download the modified SVG
+        function downloadSVG() {
+            const svgEl = workspace.querySelector('svg');
+            if (!svgEl) {
+                alert("Please upload an SVG first.");
+                return;
+            }
+
+            // Clean up our helper classes before exporting
+            const clone = svgEl.cloneNode(true);
+            clone.querySelectorAll('*').forEach(el => {
+                el.classList.remove('hovered-group', 'selected-group', 'has-id-group');
+                // Clean empty class attributes
+                if (el.classList.length === 0) el.removeAttribute('class');
+            });
+
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(clone);
+
+            // Add namespaces if missing (common issue)
+            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+
+            const blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = "labeled_workout.svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html>
