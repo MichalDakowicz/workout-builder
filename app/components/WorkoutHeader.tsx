@@ -40,8 +40,13 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
         <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
             <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 shrink-0">
-                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-sm">
-                        WB
+                    <div className="h-8 w-8 flex items-center justify-center text-primary-foreground font-bold shadow-sm">
+                        <img
+                            src="/icon.svg"
+                            alt="Workout Builder"
+                            title="Workout Builder"
+                            className="h-8 w-8 object-contain"
+                        />
                     </div>
                     <h1 className="text-lg font-semibold tracking-tight hidden sm:block">
                         Workout Builder
@@ -62,17 +67,21 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                                     }
                                     size="sm"
                                     onClick={() => onSetCurrentDay(day)}
-                                    className={`gap-2 whitespace-nowrap rounded-full h-8 ${currentDay === day
+                                    className={`gap-2 whitespace-nowrap rounded-full h-8 ${
+                                        currentDay === day
                                             ? ""
                                             : "text-muted-foreground hover:text-foreground"
-                                        }`}
+                                    }`}
                                 >
                                     Day {day}
                                     {exerciseCount > 0 && (
                                         <Badge
                                             className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums flex items-center justify-center"
-                                            variant={currentDay === day ? "outline" : undefined}
-
+                                            variant={
+                                                currentDay === day
+                                                    ? "outline"
+                                                    : undefined
+                                            }
                                         >
                                             {exerciseCount}
                                         </Badge>
@@ -89,10 +98,11 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                                 <button
                                     key={days}
                                     onClick={() => onSetTrainingDays(days)}
-                                    className={`h-6 w-6 rounded-full text-[10px] flex items-center justify-center transition-colors ${trainingDays === days
+                                    className={`h-6 w-6 rounded-full text-[10px] flex items-center justify-center transition-colors ${
+                                        trainingDays === days
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        }`}
+                                    }`}
                                 >
                                     {days}
                                 </button>

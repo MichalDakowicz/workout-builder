@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Workout Builder",
   description: "Build your perfect workout routine with ease.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
